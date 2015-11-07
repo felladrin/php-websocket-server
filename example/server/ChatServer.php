@@ -2,23 +2,19 @@
 
 require_once __DIR__ . '/../../WebSocketServer.php';
 
-foreach(glob(__DIR__ . '/controllers/*Controller.php') as $controller)
+spl_autoload_register(function($class)
 {
-    /** @noinspection PhpIncludeInspection */
-    require_once $controller;
-}
+    $foldersToAutoload = array('models', 'controllers', 'helpers');
 
-foreach(glob(__DIR__ . '/models/*.php') as $model)
-{
-    /** @noinspection PhpIncludeInspection */
-    require_once $model;
-}
-
-foreach(glob(__DIR__ . '/helpers/*.php') as $helper)
-{
-    /** @noinspection PhpIncludeInspection */
-    require_once $helper;
-}
+    foreach ($foldersToAutoload as $folder)
+    {
+        if (file_exists(__DIR__ . "/$folder/$class.php"))
+        {
+            /** @noinspection PhpIncludeInspection */
+            require_once __DIR__ . "/$folder/$class.php";
+        }
+    }
+});
 
 class ChatServer extends WebSocketServer
 {
