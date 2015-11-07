@@ -2,23 +2,11 @@
 
 require_once __DIR__ . '/../../WebSocketServer.php';
 
-spl_autoload_register(function($class)
-{
-    $foldersToAutoload = array('models', 'controllers', 'helpers');
-
-    foreach ($foldersToAutoload as $folder)
-    {
-        if (file_exists(__DIR__ . "/$folder/$class.php"))
-        {
-            /** @noinspection PhpIncludeInspection */
-            require_once __DIR__ . "/$folder/$class.php";
-        }
-    }
-});
-
 class ChatServer extends WebSocketServer
 {
     protected $debugMode = true;
+
+    protected $foldersToAutoload = array('controllers', 'helpers');
 
     protected function onMessageRecieved(WebSocketClient $sender, $message)
     {

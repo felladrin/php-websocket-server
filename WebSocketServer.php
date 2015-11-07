@@ -32,7 +32,17 @@ abstract class WebSocketServer
      */
     protected $sockets = array();
 
+    /**
+     * Whether it's on Debug Mode.
+     * @type bool $debugMode
+     */
     protected $debugMode = false;
+
+    /**
+     * Register folder paths to autoload .php files from. (Relative to the path of the class extending WebSocketServer)
+     * @type array $foldersToAutoload
+     */
+    protected $foldersToAutoload = array('models', 'controllers');
 
     protected $bufferSize = 4096;
 
@@ -179,6 +189,8 @@ abstract class WebSocketServer
         }
 
         $this->log(get_called_class() . " started listening connections on {$this->host}:{$this->port}");
+
+        $this->registerAutoload();
 
         $this->run();
     }
@@ -502,6 +514,20 @@ abstract class WebSocketServer
         }
     }
 
+    protected function registerAutoload()
+    {
+        spl_autoload_register(function($class)
+        {
+            foreach ($this->foldersToAutoload as $folder)
+            {
+                if (file_exists(getcwd() . "/$folder/$class.php"))
+                {
+                    /** @noinspection PhpIncludeInspection */
+                    require_once getcwd() . "/$folder/$class.php";
+                }
+            }
+        });
+    }
 }
 
 class WebSocketClient
