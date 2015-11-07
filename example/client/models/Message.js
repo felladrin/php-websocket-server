@@ -1,9 +1,9 @@
 var Message = {
-    add: function (message) {
+    add: function (author, message) {
         var date = new Date();
 
         var messageBubble = $("<div/>", {class: "message bubble-left"}).appendTo('.message-thread');
-        $("<label/>", {class: "message-user", text: "Unknown"}).appendTo(messageBubble);
+        $("<label/>", {class: "message-user", text: author}).appendTo(messageBubble);
         $("<label/>", { class: "message-timestamp", text: date.getHours() + ':' + date.getMinutes()
         }).appendTo(messageBubble);
         $("<p/>", {text: message}).appendTo(messageBubble);
@@ -11,7 +11,7 @@ var Message = {
 
     submit: function () {
         var messageToSubmit = document.getElementById('message-to-send');
-        WebSocketRequest.sendToServer('chat', 'submit-message', {message: messageToSubmit.value});
+        WebSocketRequest.sendToServer('message', 'submit', {message: messageToSubmit.value});
         messageToSubmit.value = '';
     }
 };

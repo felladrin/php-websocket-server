@@ -1,13 +1,8 @@
 <?php
 
-class ChatController
+class UserController
 {
-    public function actionSubmitMessage()
-    {
-        WebSocketRequest::broadcast('message', 'add', array('message' => WebSocketRequest::getParameter('message')));
-    }
-
-    public function actionHandshake()
+    public function actionRequestHistory()
     {
         $sender = WebSocketRequest::$sender;
 

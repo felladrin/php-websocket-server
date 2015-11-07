@@ -6,7 +6,7 @@ class ChatServer extends WebSocketServer
 {
     protected $debugMode = true;
 
-    protected $foldersToAutoload = array('controllers', 'helpers');
+    protected $foldersToAutoload = array('models', 'controllers', 'helpers');
 
     protected function onMessageRecieved(WebSocketClient $sender, $message)
     {
