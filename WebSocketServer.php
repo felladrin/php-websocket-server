@@ -43,11 +43,11 @@ abstract class WebSocketServer
     const PAYLOAD_LENGTH_16 = 126;
     const PAYLOAD_LENGTH_63 = 127;
 
-    /** @var self|null */
+    /** @var static|null */
     protected static $instance = null;
 
     /**
-     * @return self
+     * @return static
      */
     public static function Instance()
     {
@@ -87,30 +87,6 @@ abstract class WebSocketServer
      * @param WebSocketClient $client Client that disconnected
      */
     abstract protected function onClientDisconnected(WebSocketClient $client);
-
-    /**
-     * Sets the host to use.
-     *
-     * Only has effect before starting the server.
-     *
-     * @param string $host Host to bind to
-     */
-    public function setHost($host)
-    {
-        $this->host = $host;
-    }
-
-    /**
-     * Sets the host port to use.
-     *
-     * Only has effect before starting the server.
-     *
-     * @param integer $port Port to bind to
-     */
-    public function setPort($port)
-    {
-        $this->port = $port;
-    }
 
     /**
      * Returns array of connected clients
@@ -174,7 +150,7 @@ abstract class WebSocketServer
 
         if ($this->socket === false)
         {
-            $error = self::getLastError();
+            $error = static::getLastError();
 
             throw new Exception('Creating socket failed: ' . $error->message . ' [' . $error->code . ']');
         }
@@ -183,21 +159,21 @@ abstract class WebSocketServer
 
         if (socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 1) === false)
         {
-            $error = self::getLastError($this->socket);
+            $error = static::getLastError($this->socket);
 
             throw new Exception('Setting socket option to reuse address to true failed: ' . $error->message . ' [' . $error->code . ']');
         }
 
         if (socket_bind($this->socket, $this->host, $this->port) === false)
         {
-            $error = self::getLastError($this->socket);
+            $error = static::getLastError($this->socket);
 
             throw new Exception('Binding to port ' . $this->port . ' on host "' . $this->host . '" failed: ' . $error->message . ' [' . $error->code . ']');
         }
 
         if (socket_listen($this->socket, $maxConnections) === false)
         {
-            $error = self::getLastError($this->socket);
+            $error = static::getLastError($this->socket);
 
             throw new Exception('Starting to listen on the socket on port ' . $this->port . ' and host "' . $this->host . '" failed: ' . $error->message . ' [' . $error->code . ']');
         }
@@ -227,7 +203,7 @@ abstract class WebSocketServer
             {
                 socket_close($this->socket);
 
-                $error = self::getLastError($this->socket);
+                $error = static::getLastError($this->socket);
 
                 throw new Exception('Checking for changed sockets failed: ' . $error->message . ' [' . $error->code . ']');
             }
@@ -244,7 +220,7 @@ abstract class WebSocketServer
                     }
                     else
                     {
-                        $error = self::getLastError($this->socket);
+                        $error = static::getLastError($this->socket);
 
                         trigger_error('Failed to accept incoming client: ' . $error->message . ' [' . $error->code . ']', E_USER_WARNING);
                     }
@@ -269,7 +245,7 @@ abstract class WebSocketServer
 
                     if ($bytes === false)
                     {
-                        $error = self::getLastError($this->socket);
+                        $error = static::getLastError($this->socket);
 
                         trigger_error('Failed to receive data from client #' . $client->id . ': ' . $error->message . ' [' . $error->code . ']', E_USER_WARNING);
 
@@ -314,7 +290,7 @@ abstract class WebSocketServer
                         {
                             $client->lastRecieveTime = time();
 
-                            $this->debug('< [' . $client->id . '] ' . $message);
+                            $this->debug('Received from socket #' . $client->id . ': ' . $message);
 
                             $this->onMessageRecieved($client, $message);
                         }
@@ -343,7 +319,7 @@ abstract class WebSocketServer
         $this->clients[] = $client;
         $this->sockets[] = $socket;
 
-        $this->debug('+ [' . $client->id . '] connected');
+        $this->debug('Socket #' . $client->id . ' connected.');
 
         $this->onClientConnected($client);
     }
@@ -369,7 +345,7 @@ abstract class WebSocketServer
         {
             if ($client->socket === $clientSocket)
             {
-                $this->debug('- [' . $client->id . '] client disconnected');
+                $this->debug('Socket #' . $client->id . ' disconnected.');
 
                 $this->onClientDisconnected($client);
 
@@ -408,7 +384,7 @@ abstract class WebSocketServer
      */
     public function send($socket, $message)
     {
-        $opcode = self::OPCODE_TEXT;
+        $opcode = static::OPCODE_TEXT;
 
         if (is_object($message))
         {
@@ -429,8 +405,8 @@ abstract class WebSocketServer
 
         for ($i = 0; $i < $frameCount; $i++)
         {
-            $fin = $i != $maxFrame ? 0 : self::FIN;
-            $opcode = $i != 0 ? self::OPCODE_CONTINUATION : $opcode;
+            $fin = $i != $maxFrame ? 0 : static::FIN;
+            $opcode = $i != 0 ? static::OPCODE_CONTINUATION : $opcode;
 
             $bufferLength = $i != $maxFrame ? $this->bufferSize : $lastFrameBufferLength;
 
@@ -442,13 +418,13 @@ abstract class WebSocketServer
             }
             else if ($bufferLength <= 65535)
             {
-                $payloadLength = self::PAYLOAD_LENGTH_16;
+                $payloadLength = static::PAYLOAD_LENGTH_16;
                 $payloadLengthExtended = pack('n', $bufferLength);
                 $payloadLengthExtendedLength = 2;
             }
             else
             {
-                $payloadLength = self::PAYLOAD_LENGTH_63;
+                $payloadLength = static::PAYLOAD_LENGTH_63;
                 $payloadLengthExtended = pack('xxxxN', $bufferLength);
                 $payloadLengthExtendedLength = 8;
             }
@@ -484,7 +460,7 @@ abstract class WebSocketServer
             $clientId = $client->id;
         }
 
-        $this->debug('> [' . $clientId . '] ' . $message);
+        $this->debug('Sending to socket #' . $clientId . ': ' . $message);
 
         return true;
     }
@@ -531,11 +507,11 @@ abstract class WebSocketServer
 class WebSocketClient
 {
     /**
-     * Number of instances created.
+     * Auto-incremented id for identifying the next client.
      *
      * @var integer
      */
-    static $nextId = 0;
+    private static $nextId = 0;
 
     /**
      * Reference to server that created the client.
@@ -624,52 +600,18 @@ class WebSocketClient
      *
      * @param WebSocketServer $server Parent server
      * @param resource $socket User socket
-     * @param integer $state Initial state
      */
-    public function __construct(WebSocketServer $server, $socket, $state = self::STATE_CONNECTING)
+    public function __construct(WebSocketServer $server, $socket)
     {
-        self::$nextId++;
+        static::$nextId++;
 
         $this->server = $server;
-        $this->id = self::$nextId;
+        $this->id = static::$nextId;
         $this->socket = $socket;
-        $this->state = $state;
+        $this->state = static::STATE_CONNECTING;
         $this->lastRecieveTime = time();
 
         socket_getpeername($socket, $this->ip, $this->port);
-    }
-
-    /**
-     * Sends a message to the client.
-     *
-     * @param mixed $message Message to send
-     * @throws Exception
-     */
-    public function send($message)
-    {
-        if ($this->state == self::STATE_CLOSED)
-        {
-            $this->server->debug('Unable to send message, connection has been closed.');
-            return;
-        }
-
-        $this->server->send($this->socket, $message);
-    }
-
-    /**
-     * Sends a message to all other clients, excluding the sender.
-     *
-     * @param mixed $message Message to send
-     */
-    public function broadcast($message)
-    {
-        foreach ($this->server->getClients() as $client)
-        {
-            if ($client != $this)
-            {
-                $this->server->send($client->socket, $message);
-            }
-        }
     }
 
     /**
@@ -707,7 +649,7 @@ class WebSocketClient
      */
     public function disconnect()
     {
-        if ($this->state == self::STATE_CLOSED)
+        if ($this->state == static::STATE_CLOSED)
         {
             return;
         }
@@ -724,7 +666,7 @@ class WebSocketClient
      */
     public function performHandshake($buffer)
     {
-        if ($this->state != self::STATE_CONNECTING)
+        if ($this->state != static::STATE_CONNECTING)
         {
             throw new Exception('Unable to perform handshake, client is not in connecting state');
         }
@@ -764,7 +706,7 @@ class WebSocketClient
         }
         while ($left > 0);
 
-        $this->state = self::STATE_OPEN;
+        $this->state = static::STATE_OPEN;
     }
 
     /**
@@ -793,10 +735,96 @@ class WebSocketClient
 
 class WebSocketRequest
 {
-    /** @type WebSocketController[] $controllers */
+    /** @type stdClass[] $controllers */
     private static $controllers = array();
 
-    public static function encode($controller, $action, array $parameters = array())
+    /** @type array $parameters */
+    private static $parameters = array();
+
+    /** @type WebSocketClient $sender */
+    public static $sender;
+
+    /**
+     * Returns the parameter an specifc parameter value. If the paramter does not exist, returns the default value.
+     *
+     * @param string $name Name of the parameter to be retrieved.
+     * @param mixed $default Value to be returned in case the paramter does not exist.
+     *
+     * @return mixed|null
+     */
+    public static function getParameter($name, $default = null)
+    {
+        if (array_key_exists($name, static::$parameters))
+        {
+            return static::$parameters[$name];
+        }
+        else
+        {
+            return $default;
+        }
+    }
+
+    /**
+     * Sends a WebSocketRequest to all connected sockets.
+     *
+     * @param $controller
+     * @param $action
+     * @param array $parameters
+     */
+    public static function broadcast($controller, $action, array $parameters = array())
+    {
+        $message = static::encode($controller, $action, $parameters);
+        WebSocketServer::Instance()->broadcast($message);
+    }
+
+    /**
+     * Sends a WebSocketRequest to all connected sockets, except to the sender.
+     *
+     * @param $controller
+     * @param $action
+     * @param array $parameters
+     */
+    public static function broadcastExcludingSender($controller, $action, array $parameters = array())
+    {
+        $message = static::encode($controller, $action, $parameters);
+        $server = WebSocketServer::Instance();
+        $sender = static::$sender;
+
+        foreach ($server->getClients() as $client)
+        {
+            if ($client != $sender)
+            {
+                $server->send($client->socket, $message);
+            }
+        }
+    }
+
+    /**
+     * Sends a WebSocketRequest back to the sender.
+     *
+     * @param $controller
+     * @param $action
+     * @param array $parameters
+     */
+    public static function reply($controller, $action, array $parameters = array())
+    {
+        $message = static::encode($controller, $action, $parameters);
+        $server = WebSocketServer::Instance();
+        $sender = static::$sender;
+
+        $server->send($sender->socket, $message);
+    }
+
+    /**
+     * Encodes a WebSocketRequest in JSON format.
+     *
+     * @param $controller
+     * @param $action
+     * @param array $parameters
+     *
+     * @return string
+     */
+    private static function encode($controller, $action, array $parameters = array())
     {
         return json_encode(array(
             $controller,
@@ -805,6 +833,12 @@ class WebSocketRequest
         ));
     }
 
+    /**
+     * Decodes a JSON WebSocketRequest and calls runs the spectific controller action.
+     *
+     * @param WebSocketClient $sender
+     * @param $message
+     */
     public static function decode(WebSocketClient $sender, $message)
     {
         $request = json_decode($message, true);
@@ -817,71 +851,27 @@ class WebSocketRequest
         $controllerName = str_replace(' ', '', ucwords(str_replace('-', ' ', $request[0]))) . 'Controller';
         $actionName = 'action' . str_replace(' ', '', ucwords(str_replace('-', ' ', $request[1])));
 
-        if (!isset(self::$controllers[$controllerName]))
+        if (!isset(static::$controllers[$controllerName]))
         {
-            if (!class_exists($controllerName) || !is_subclass_of($controllerName, 'WebSocketController'))
+            if (!class_exists($controllerName))
             {
                 return;
             }
 
-            self::$controllers[$controllerName] = new $controllerName();
+            static::$controllers[$controllerName] = new $controllerName();
         }
 
-        $controller = self::$controllers[$controllerName];
-        $controller->setSender($sender);
+        $controller = static::$controllers[$controllerName];
+        static::$sender = $sender;
 
         if (!empty($request[2]) && is_array($request[2]))
         {
-            $controller->setParameters($request[2]);
+            static::$parameters = $request[2];
         }
 
         if (is_callable(array($controller, $actionName)))
         {
             $controller->$actionName();
         }
-    }
-}
-
-abstract class WebSocketController
-{
-    protected $parameters;
-    protected $sender;
-
-    public function setParameters(array $parameters)
-    {
-        $this->parameters = $parameters;
-    }
-
-    /**
-     * @return array
-     */
-    public function getParameters()
-    {
-        return $this->parameters;
-    }
-
-    public function getParameter($name, $default = null)
-    {
-        if (array_key_exists($name, $this->parameters))
-        {
-            return $this->parameters[$name];
-        }
-        else
-        {
-            return $default;
-        }
-    }
-
-    public function setSender(WebSocketClient $sender)
-    {
-        $this->sender = $sender;
-    }
-
-    /**
-     * @return WebSocketClient|null
-     */
-    public function getSender()
-    {
-        return $this->sender;
     }
 }
