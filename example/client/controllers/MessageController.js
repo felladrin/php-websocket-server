@@ -1,9 +1,10 @@
+//noinspection JSUnusedGlobalSymbols
 var MessageController = {
     actionAdd: function (params) {
-        Chat.addMessage(params.message)
+        Message.add(params.message)
     },
 
-    actionRemove: function (params) {
-        Chat.addMessage('Someone is trying to remove a message!');
+    actionRemove: function () {
+        Message.add('Someone is trying to remove a message!');
     }
 };

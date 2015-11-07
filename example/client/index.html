@@ -2,87 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chat</title>
-    <script src="models/Chat.js"></script>
+    <title>Chat Example</title>
+    <link href="css/style.css" rel="stylesheet">
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="models/Message.js"></script>
+    <script src="models/User.js"></script>
     <script src="controllers/MessageController.js"></script>
     <script src="controllers/UserController.js"></script>
+    <script src="js/WebSocketRequest.js"></script>
+    <script src="js/WebSocketConnection.js"></script>
     <script>
-        var WebSocketRequest = {
-            websocket: null,
+        WebSocketConnection.start('ws://localhost:8080');
 
-            sendToServer: function(controller, action, parameters){
-                if (this.websocket)
-                {
-                    if (parameters)
-                    {
-                        this.websocket.send(JSON.stringify([
-                            controller,
-                            action,
-                            parameters
-                        ]));
-                    }
-                    else
-                    {
-                        this.websocket.send(JSON.stringify([
-                            controller,
-                            action
-                        ]));
-                    }
+        $(document).ready(function () {
+            $('#message-submit-button').click(Message.submit);
+            $('#message-to-send').keypress(function(e) {
+                if(e.which == 13) {
+                    e.preventDefault();
+                    Message.submit();
                 }
-            },
-
-            decode: function(receivedData) {
-                try
-                {
-                    var request = JSON.parse(receivedData);
-                    if (request[0] && request[1])
-                    {
-                        var controllerName = this.formatName('', request[0], 'Controller');
-                        var actionName = this.formatName('action', request[1]);
-                        var params = JSON.stringify(request[2]) || '{}';
-                        eval(controllerName + '.' + actionName + '(' + params + ')');
-                    }
-                }
-                catch(error)
-                {
-                    console.log('WebSocket Error: ' + error.message);
-                }
-            },
-
-            formatName: function(prefix, str, suffix) {
-                str = str.replace('-', ' ');
-                str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
-                    return letter.toUpperCase();
-                });
-                str = str.replace(' ', '');
-                suffix = suffix || '';
-                return prefix + str + suffix;
-            }
-        };
-
-        var websocketAddess = 'ws://localhost:8080';
-
-        var websocket = new WebSocket(websocketAddess);
-
-        websocket.onopen = function () {
-            WebSocketRequest.websocket = websocket;
-            WebSocketRequest.sendToServer('chat', 'handshake');
-        };
-
-        websocket.onmessage = function (e) {
-            WebSocketRequest.decode(e.data);
-        };
-
-        websocket.onerror = function (error) {
-            console.log('WebSocket Error: ' + error);
-        };
+            });
+        });
     </script>
 </head>
 <body>
-    <ul id="message-list">
-        <li>Welcome to the chat</li>
-    </ul>
-    <input type="text" id="message-to-send" title="Type your message"/>
-    <input type="button" id="send-button" value="Send" onclick="Chat.submitMessage();">
+<div id="wrapper">
+    <div class="message-container">
+        <div class="message-north">
+            <ul class="message-user-list">
+                <li>
+                    <a class="active" href="#">
+                        <span class="user-img"></span>
+                        <span class="user-title">Deckard Cain</span>
+                        <p class="user-desc">deckard@cain.com</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="user-img"></span>
+                        <span class="user-title">You</span>
+                        <p class="user-desc">you@gmail.com</p>
+                    </a>
+                </li>
+            </ul>
+            <div class="message-thread">
+                <div class="message bubble-right">
+                    <label class="message-user">Deckard Cain</label>
+                    <label class="message-timestamp">Right Now</label>
+                    <p>Hello my friend, stay a while and listen...</p>
+                </div>
+            </div>
+        </div>
+        <div class="message-south">
+            <textarea id="message-to-send" title="Type your message"></textarea>
+            <button id="message-submit-button">Send</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
