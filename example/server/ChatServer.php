@@ -14,6 +14,12 @@ foreach(glob(__DIR__ . '/models/*.php') as $model)
     require_once $model;
 }
 
+foreach(glob(__DIR__ . '/helpers/*.php') as $helper)
+{
+    /** @noinspection PhpIncludeInspection */
+    require_once $helper;
+}
+
 class ChatServer extends WebSocketServer
 {
     protected $debugMode = true;
