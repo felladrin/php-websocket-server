@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <script src="models/Chat.js"></script>
+    <script src="controllers/MessageController.js"></script>
+    <script src="controllers/UserController.js"></script>
+    <script>
+        var WebSocketRequest = {
+            websocket: null,
+
+            sendToServer: function(controller, action, parameters){
+                if (this.websocket)
+                {
+                    if (parameters)
+                    {
+                        this.websocket.send(JSON.stringify([
+                            controller,
+                            action,
+                            parameters
+                        ]));
+                    }
+                    else
+                    {
+                        this.websocket.send(JSON.stringify([
+                            controller,
+                            action
+                        ]));
+                    }
+                }
+            },
+
+            decode: function(receivedData) {
+                try
+                {
+                    var request = JSON.parse(receivedData);
+                    if (request[0] && request[1])
+                    {
+                        var controllerName = this.formatName('', request[0], 'Controller');
+                        var actionName = this.formatName('action', request[1]);
+                        var params = JSON.stringify(request[2]) || '{}';
+                        eval(controllerName + '.' + actionName + '(' + params + ')');
+                    }
+                }
+                catch(error)
+                {
+                    console.log('WebSocket Error: ' + error.message);
+                }
+            },
+
+            formatName: function(prefix, str, suffix) {
+                str = str.replace('-', ' ');
+                str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+                    return letter.toUpperCase();
+                });
+                str = str.replace(' ', '');
+                suffix = suffix || '';
+                return prefix + str + suffix;
+            }
+        };
+
+        var websocketAddess = 'ws://localhost:8080';
+
+        var websocket = new WebSocket(websocketAddess);
+
+        websocket.onopen = function () {
+            WebSocketRequest.websocket = websocket;
+            WebSocketRequest.sendToServer('chat', 'handshake');
+        };
+
+        websocket.onmessage = function (e) {
+            WebSocketRequest.decode(e.data);
+        };
+
+        websocket.onerror = function (error) {
+            console.log('WebSocket Error: ' + error);
+        };
+    </script>
+</head>
+<body>
+    <ul id="message-list">
+        <li>Welcome to the chat</li>
+    </ul>
+    <input type="text" id="message-to-send" title="Type your message"/>
+    <input type="button" id="send-button" value="Send" onclick="Chat.submitMessage();">
+</body>
+</html>
