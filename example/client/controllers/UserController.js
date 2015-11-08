@@ -17,7 +17,7 @@ var UserController = {
     actionRename: function (params) {
         User.remove(params['id']);
         User.add(params['id'], params['to']);
-        Message.add('System', params['from'] + ' has been ranamed to ' + params['to'] + '.');
+        Message.add('System', params['from'] + ' has been renamed to ' + params['to'] + '.');
     },
 
     actionLoadUserList: function (params) {
