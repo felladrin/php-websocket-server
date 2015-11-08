@@ -29,7 +29,7 @@ class ChatServer extends WebSocketServer
 
 try
 {
-    ChatServer::Instance()->start('127.0.0.1', 8080);
+    ChatServer::Instance()->start('localhost', 2593);
 }
 catch (Exception $e)
 {
