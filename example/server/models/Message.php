@@ -2,19 +2,21 @@
 
 class Message
 {
+    const DATETIME_FORMAT = 'M j, H:i';
+
     private static $history = array();
 
     public static function addToHistory($author, $text)
     {
-        if (count(static::$history) > 50)
+        if (count(static::$history) >= 25)
         {
-            unset(static::$history[0]);
+            array_shift(static::$history);
         }
 
         array_push(static::$history, array(
-            $author,
-            $text,
-            date('Y-m-d H:s:i')
+            'author' => $author,
+            'text' => $text,
+            'datetime' => date(static::DATETIME_FORMAT)
         ));
     }
 

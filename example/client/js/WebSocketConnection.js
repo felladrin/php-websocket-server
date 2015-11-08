@@ -4,6 +4,7 @@ var WebSocketConnection = {
 
         websocket.onopen = function () {
             WebSocketRequest.websocket = websocket;
+            WebSocketRequest.sendToServer('user', 'setup');
         };
 
         websocket.onmessage = function (e) {

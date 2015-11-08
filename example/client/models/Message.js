@@ -1,12 +1,19 @@
 var Message = {
-    add: function (author, message) {
+    add: function (author, text, datetime) {
         var date = new Date();
 
-        var messageBubble = $("<div/>", {class: "message bubble-left"}).appendTo('.message-thread');
+        datetime = datetime || date.getHours() + ':' + date.getMinutes();
+
+        var divClass = "message bubble-" + ((author == 'System') ? 'right' : 'left');
+
+        var messageThread = $(".message-thread");
+
+        var messageBubble = $("<div/>", {class: divClass}).appendTo(messageThread);
         $("<label/>", {class: "message-user", text: author}).appendTo(messageBubble);
-        $("<label/>", { class: "message-timestamp", text: date.getHours() + ':' + date.getMinutes()
-        }).appendTo(messageBubble);
-        $("<p/>", {text: message}).appendTo(messageBubble);
+        $("<label/>", {class: "message-timestamp", text: datetime}).appendTo(messageBubble);
+        $("<p/>", {text: text}).appendTo(messageBubble);
+
+        messageThread.scrollTop(1E10);
     },
 
     submit: function () {

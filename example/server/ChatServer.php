@@ -16,13 +16,14 @@ class ChatServer extends WebSocketServer
     protected function onClientConnected(WebSocketClient $newClient)
     {
         WebSocketRequest::$sender = $newClient;
-        WebSocketRequest::broadcastExcludingSender('user', 'connected', array('id' => $newClient->id));
+        WebSocketRequest::$sender->set('name', RandomName::Full());
+        WebSocketRequest::broadcastExcludingSender('user', 'connected', array('id' => $newClient->id, 'name' => WebSocketRequest::$sender->get('name')));
     }
 
     protected function onClientDisconnected(WebSocketClient $leftClient)
     {
         WebSocketRequest::$sender = $leftClient;
-        WebSocketRequest::broadcastExcludingSender('user', 'disconnected', array('id' => $leftClient->id));
+        WebSocketRequest::broadcastExcludingSender('user', 'disconnected', array('id' => $leftClient->id, 'name' => WebSocketRequest::$sender->get('name')));
     }
 }
 
