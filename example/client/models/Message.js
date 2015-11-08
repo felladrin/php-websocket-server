@@ -19,13 +19,15 @@ var Message = {
     submit: function () {
         var messageToSubmit = document.getElementById('message-to-send');
 
-        if (messageToSubmit.value.charAt(0) === '/')
+        var messageValue = messageToSubmit.value.trim();
+
+        if (messageValue.charAt(0) === '/')
         {
-            WebSocketRequest.sendToServer('command', 'decode', {message: messageToSubmit.value});
+            WebSocketRequest.sendToServer('command', 'decode', {message: messageValue});
         }
         else
         {
-            WebSocketRequest.sendToServer('message', 'submit', {message: messageToSubmit.value});
+            WebSocketRequest.sendToServer('message', 'submit', {message: messageValue});
         }
 
         messageToSubmit.value = '';
