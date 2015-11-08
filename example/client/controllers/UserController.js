@@ -15,12 +15,18 @@ var UserController = {
     },
 
     actionRename: function (params) {
-        Message.add('System', params['name'] + ' has been ranamed.');
+        User.remove(params['id']);
+        User.add(params['id'], params['to']);
+        Message.add('System', params['from'] + ' has been ranamed to ' + params['to'] + '.');
     },
 
     actionLoadUserList: function (params) {
         params.forEach(function (user) {
             User.add(user['id'], user['name']);
         });
+    },
+
+    actionAlertUnknownCommand: function (params) {
+        Message.add('System', 'Command /' + params['command'] + ' has not been implemented yet ;)');
     }
 };
