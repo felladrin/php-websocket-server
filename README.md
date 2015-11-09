@@ -10,4 +10,4 @@ Then, on your browser, access: `http://localhost/path/to/php-websocket-server/ex
 
 ## Credits
 
-This project is derived from the [kallaspriit's php-html5-websocket-server](https://github.com/kallaspriit/PHP-HTML5-WebSocket-Server).
+WebSocketServer class is derived from the [kallaspriit's php-html5-websocket-server](https://github.com/kallaspriit/PHP-HTML5-WebSocket-Server).
