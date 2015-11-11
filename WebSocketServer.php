@@ -34,13 +34,13 @@ abstract class WebSocketServer
 
     /**
      * Whether it's on Debug Mode.
-     * @type bool $debugMode
+     * @var bool $debugMode
      */
     protected $debugMode = false;
 
     /**
      * Register folder paths to autoload .php files from. (Relative to the path of the class extending WebSocketServer)
-     * @type array $foldersToAutoload
+     * @var array $foldersToAutoload
      */
     protected $foldersToAutoload = array('models', 'controllers');
 
@@ -761,13 +761,13 @@ class WebSocketClient
 
 class WebSocketRequest
 {
-    /** @type stdClass[] $controllers */
+    /** @var stdClass[] $controllers */
     private static $controllers = array();
 
-    /** @type array $parameters */
+    /** @var array $parameters */
     private static $parameters = array();
 
-    /** @type WebSocketClient $sender */
+    /** @var WebSocketClient $sender */
     public static $sender;
 
     /**
