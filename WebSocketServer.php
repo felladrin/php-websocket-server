@@ -148,7 +148,7 @@ abstract class WebSocketServer
      * @param integer $maxConnections Max number of incoming backlog connections
      * @throws Exception If something goes wrong
      */
-    public function start($host = '127.0.0.1', $port = 8080, $maxConnections = SOMAXCONN)
+    public function start($host = 'localhost', $port = 8080, $maxConnections = SOMAXCONN)
     {
         set_time_limit(0);
         ob_implicit_flush();
@@ -514,6 +514,9 @@ abstract class WebSocketServer
         }
     }
 
+    /**
+     * Registers the folders to have their php files autoloaded.
+     */
     protected function registerAutoload()
     {
         spl_autoload_register(function($class)
@@ -835,10 +838,9 @@ class WebSocketRequest
     public static function reply($controller, $action, array $parameters = array())
     {
         $message = static::encode($controller, $action, $parameters);
-        $server = WebSocketServer::Instance();
         $sender = static::$sender;
 
-        $server->send($sender->socket, $message);
+        WebSocketServer::Instance()->send($sender->socket, $message);
     }
 
     /**
