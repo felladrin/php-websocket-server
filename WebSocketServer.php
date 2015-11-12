@@ -644,33 +644,27 @@ class WebSocketClient
     }
 
     /**
-     * Sets client property.
+     * Sets a client variable. If the specified key already exists, the old value will be overwritten.
      *
-     * @param string $name Property name
-     * @param mixed $value Property value
+     * @param string $key Variable key.
+     * @param mixed $value Variable value.
      */
-    public function set($name, $value)
+    public function set($key, $value)
     {
-        $this->data[$name] = $value;
+        $this->data[$key] = $value;
     }
 
     /**
-     * Returns client property.
+     * Returns a client variable.
      *
-     * @param string $name Name of the property
-     * @param mixed $default Default value returned when property does not exist
+     * @param string $key Variable key.
+     * @param mixed $defaultValue Default value returned when variable does not exist.
+     *
      * @return mixed
      */
-    public function get($name, $default = null)
+    public function get($key, $defaultValue = null)
     {
-        if (array_key_exists($name, $this->data))
-        {
-            return $this->data[$name];
-        }
-        else
-        {
-            return $default;
-        }
+        return (array_key_exists($key, $this->data)) ? $this->data[$key] : $defaultValue;
     }
 
     /**
