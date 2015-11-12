@@ -777,11 +777,11 @@ class WebSocketRequest
      * Returns the parameter an specifc parameter value. If the paramter does not exist, returns the default value.
      *
      * @param string $name Name of the parameter to be retrieved.
-     * @param mixed $default Value to be returned in case the paramter does not exist.
+     * @param mixed $defaultValue Value to be returned in case the paramter does not exist.
      *
      * @return mixed|null
      */
-    public static function getParameter($name, $default = null)
+    public static function getParameter($name, $defaultValue = null)
     {
         if (array_key_exists($name, static::$parameters))
         {
@@ -789,7 +789,7 @@ class WebSocketRequest
         }
         else
         {
-            return $default;
+            return $defaultValue;
         }
     }
 
